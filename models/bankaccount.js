@@ -41,8 +41,8 @@ module.exports = (sequelize, DataTypes) => {
   BankAccount.init({
     user_id: {type: DataTypes.BIGINT(20).UNSIGNED, allowNull: false},
     account_number: {type: DataTypes.STRING(255), allowNull: false},
-    issue_date: {type: DataTypes.DATE, allowNull: false},
-    exp_date: {type: DataTypes.DATE, allowNull: false},
+    transit_number: {type: DataTypes.INTEGER, allowNull: false},
+    institution_number: {type: DataTypes.INTEGER, allowNull: false},
     account_password: {type: DataTypes.TEXT('long'), allowNull: true},
     status: {type: DataTypes.ENUM, values: ['active', 'pending', 'closed'], defaultValue: 'pending', allowNull: false},
     currency_type: {type: DataTypes.ENUM, allowNull: false, values: ['usd', 'cad', 'naira', 'pounds'], defaultValue: 'cad'},

@@ -5,6 +5,7 @@ const cors = require('cors');
 const routes = require('./routes');
 const moment = require("moment");
 
+const paspportStrategy = require('./Controllers/SocialLoginController');
 const app = express();
 dotenv.config();
 

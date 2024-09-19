@@ -41,7 +41,7 @@ const login = (req, res) => {
 							return helper.response({ message: 'Invalid credentials' }, 422)
 					}).catch(e => console.log(e));
 				else
-					return helper.response({ message: 'User doesn\'t exist' }, 422)
+					return helper.response(res,{ message: 'User doesn\'t exist' }, 422)
 			}).catch(e => console.log(e));
 		} catch (e) {
 			return helper.response(res, { message: 'An error Occurred', error: e}, 500);

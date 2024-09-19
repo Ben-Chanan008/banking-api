@@ -14,7 +14,7 @@ router.get('/:id', validateToken, async (req, res) => {
 	BankAccountController.getAccount(req, res);
 });
 
-router.put('/edit/:id', formData.none(), validateToken, async (req, res) => {
+router.put('/verify-account/:id', formData.none(), validateToken, async (req, res) => {
 	BankAccountController.updatePassword(req, res);
 });
 

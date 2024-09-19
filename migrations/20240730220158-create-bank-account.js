@@ -20,7 +20,7 @@ module.exports = {
         onUpdate: "NO ACTION"
       },
       account_number: {
-        type: Sequelize.INTEGER(16),
+        type: Sequelize.STRING,
 	    allowNull: false
       },
       account_password: {

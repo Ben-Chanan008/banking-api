@@ -17,6 +17,21 @@ const generateNumberLength = (length) => {
 	return parseInt(shuffledNumber)
 }
 
+const generateRandomNumber = (length) => {
+  if (length <= 0) {
+    throw new Error('Length must be a positive integer.');
+  }
+
+  length = Math.floor(length);
+
+  const min = Math.pow(10, length - 1);
+  const max = Math.pow(10, length) - 1;
+
+  const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+
+  return randomNumber.toString().padStart(length, '0');
+}
+
 const operate = (x, y, operation) => {
 	const operators = {
 		'+': (x, y) => parseInt(x) + parseInt(y),
@@ -61,7 +76,7 @@ const createDBToken = (res, userId) => {
 			token,
 			user_id: userId,
 			exp_date: moment().add(24, 'hours')
-		}).then((response) => resolve(response.dataValues.token)).catch(e => reject(e));
+		}).then((response) => resolve(response.dataValues)).catch(e => reject(e));
 	});
 }
 
@@ -78,4 +93,4 @@ const shuffle = (string) => {
 	return a.join("");
 }
 
-module.exports = { titleCase, formatJoiError, response, createDBToken, shuffle, generateNumberLength, operate };
+module.exports = { titleCase, formatJoiError, response, createDBToken, shuffle, generateRandomNumber, operate };

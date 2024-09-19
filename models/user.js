@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
     phone: {type: DataTypes.TEXT('medium'), allowNull: false},
     address: {type: DataTypes.TEXT('long'), allowNull: true},
     is_active: {type: DataTypes.BOOLEAN, allowNull: false, defaultValue: 1},
-    // deleted_at: {type: DataTypes.DATE, allowNull: true}
+    deleted_at: {type: DataTypes.DATE, allowNull: true}
   }, {
     sequelize,
     modelName: 'User',
