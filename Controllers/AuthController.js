@@ -2,13 +2,13 @@ const Joi = require("joi");
 const helper = require('../helpers');
 const bcrypt = require('bcryptjs');
 const { User, AccessToken } = require('../models');
-const {Op} = require("sequelize");
+const {Op, where} = require("sequelize");
+const { jwtDecode } = require('jwt-decode');
 const moment = require("moment");
 
 const login = (req, res) => {
 	const validator = Joi.object({
-		username: Joi.string().max(255),
-		email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['co', 'uk', 'za', 'ca', 'com', 'net']} }),
+		logger: Joi.string().max(255),
 		password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{8,16}$')).required()
 	});
 	
@@ -17,7 +17,7 @@ const login = (req, res) => {
 	validator.validateAsync(body, { allowUnknown: true, abortEarly: true }).then((validated) => {
 		try{
 			User.findOne({where: {
-				[Op.or]: [{email: validated.email ?? null}, {username: validated.username ?? null}]
+				[Op.or]: [{email: validated.logger ?? null}, {username: validated.logger ?? null}]
 			}}).then((response) => {
 				if(response)
 					bcrypt.compare(validated.password, response.dataValues.password).then((match) => {
@@ -27,7 +27,7 @@ const login = (req, res) => {
 									if(moment(new Date()) >= moment(data.dataValues.exp_date))
 										AccessToken.update({status: 'used'}, {where: {id: data.dataValues.id}}).then(() => {
 											helper.createDBToken(res, response.dataValues.id).then((token) => {
-												return helper.response(res,{ message: 'Login Successful', token}, 200);
+												return helper.response(res,{ message: 'Login Successful', token: token.token}, 200);
 											});
 										});
 									else
@@ -49,4 +49,21 @@ const login = (req, res) => {
 	}).catch((err) => console.log(err));
 }
 
-module.exports = { login }
+const verify = (req, res) => {
+	let token = req.header('Authorization'),
+		bearerToken = token.split(' ')[1];
+	if(token)
+		try{
+			let verifiedToken = jwt.verify(bearerToken, process.env.APP_KEY);
+			if(verifiedToken)
+				return helper.response(res, {message: 'VERIFIED!!', is_verified: true}, 200);
+		} catch(e){
+			let decodedToken = jwtDecode(bearerToken);
+			AccessToken.update({status: 'used'}, {where: {id: decodedToken.id}}).then(response => {
+				if(response)
+					return helper.response(res, {message: 'NOT VERIFIED!!', is_verified: false}, 400);
+			}).catch(error => helper.response(res, {error, message: 'An Error Occured'}, 500));
+		}
+}
+
+module.exports = { login, verify }

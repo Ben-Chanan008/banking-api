@@ -12,6 +12,10 @@ router.post('/login', formData.none(), async (req, res, next) => {
 	AuthController.login(req, res)
 });
 
+router.get('/auth/verify', (req, res) => {
+	AuthController.verify(req, res);
+});
+
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile'] }));
 
 router.get('/auth/google/redirect', passport.authenticate('google'), () => {});

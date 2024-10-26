@@ -32,10 +32,10 @@ const validateToken = (req, res, next) => {
 						return helper.response(res, {message: 'Please Login', redirect: '/login'}, 422);
 				});
 		} catch (e){
-			return helper.response(res, { message: 'Token expired' }, 401)
+			return helper.response(res, { message: 'Token has expired' }, 400)
 		}
 	} else
-		return helper.response(res, { message: 'Unauthorized request' }, 400)
+		return helper.response(res, { message: 'Unauthorized request' }, 401)
 }
 
 module.exports = { validateToken }
