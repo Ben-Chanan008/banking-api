@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
 	    this.belongsTo(models.User, {
-			foreignKey: 'user_id',
+			  foreignKey: 'user_id',
 		    onUpdate: 'NO ACTION',
 		    onDelete: 'CASCADE'
 	    });
@@ -50,9 +50,12 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'BankAccount',
-	paranoid: true,
-	timestamps: true,
-	underscored: true
+	  paranoid: true,
+	  timestamps: true,
+	  underscored: true,
+    tableName: 'bank_accounts',
+    
+    // freezeTableName: true
   });
   return BankAccount;
 };

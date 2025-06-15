@@ -84,3 +84,9 @@
 [2025-06-10T00:00:23.192Z] INFO: Request: GET /api/user/auth/verify
 [2025-06-10T00:00:23.212Z] INFO: Request: GET /api/user/get-user/1
 [2025-06-10T01:57:53.357Z] INFO: Request: GET /api/user/auth/verify
+[2025-06-15T13:18:16.911Z] INFO: Request: POST /api/user/login
+[2025-06-15T13:18:32.460Z] INFO: Request: POST /api/user/login
+[2025-06-15T13:20:11.052Z] INFO: Request: GET /api/user/get-users
+[2025-06-15T13:28:57.553Z] INFO: Request: GET /api/user/get-users
+[2025-06-15T13:29:18.766Z] INFO: Request: GET /api/user/get-users
+[2025-06-15T13:29:30.257Z] INFO: Request: GET /api/user/get-users
