@@ -6,10 +6,11 @@ const { Op, where } = require("sequelize");
 const jwt = require('jsonwebtoken');
 const { jwtDecode } = require('jwt-decode');
 const moment = require("moment");
+const { logger } = require("sequelize/lib/utils/logger");
 
 const login = (req, res) => {
 	const validator = Joi.object({
-		logger: Joi.string().max(255),
+		logger: Joi.string().max(255).required().messages({'any.required': 'Email or password is required!'}),
 		password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{8,16}$')).required()
 	});
 
@@ -19,7 +20,7 @@ const login = (req, res) => {
 		try {
 			User.findOne({
 				where: {
-					[Op.or]: [{ email: validated.logger ?? null }, { username: validated.logger ?? null }]
+					[Op.or]: [{ email: validated.logger }, { username: validated.logger }]
 				}
 			}).then((response) => {
 				if (response)
@@ -50,7 +51,7 @@ const login = (req, res) => {
 		} catch (e) {
 			return helper.response(res, { message: 'An error Occurred', error: e }, 500);
 		}
-	}).catch((err) => console.log(err));
+	}).catch((err) => helper.response(res, {message: err.details[0].message, error: err}, 400));
 }
 
 const verify = (req, res) => {
@@ -62,7 +63,7 @@ const verify = (req, res) => {
 			if (verifiedToken)
 				return helper.response(res, { message: 'VERIFIED!!', is_verified: true }, 200);
 		} catch (e) {
-			console.log(e)
+			// console.log(e)
 			let decodedToken = jwtDecode(bearerToken);
 			AccessToken.update({ status: 'used' }, { where: { user_id: decodedToken.id } }).then(response => {
 				if (response)
@@ -78,6 +79,18 @@ const logout = (req, res) => {
 				helper.response(res, { isLoggedOut: true }, 201);
 		}).catch(error => helper.response(res, { error }, 500))
 	}).catch(error => helper.response(res, { error }, 500))
+}
+
+const updatePassowrd = () => {
+	const validator = Joi.object({
+		logger: Joi.required(),
+	});
+
+	let body = req.body
+
+	validator.validateAsync(body, {allowUnknown: true, abortEarly: false}).then((validated) => {
+		User.findOne({ where: { [Op.or]: { email: validated.logger  } } })
+	}); 
 }
 
 module.exports = { login, verify, logout }
