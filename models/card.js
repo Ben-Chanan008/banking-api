@@ -26,7 +26,8 @@ module.exports = (sequelize, DataTypes) => {
 		this.hasMany(models.BankAccountBalance, {
 		    foreignKey: 'card_id',
 		    onUpdate: "NO ACTION",
-		    onDelete: "NO ACTION"
+		    onDelete: "NO ACTION",
+            as: 'balance'
 	    });
     }
   }

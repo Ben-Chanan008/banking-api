@@ -14,7 +14,8 @@ module.exports = (sequelize, DataTypes) => {
 	    this.belongsTo(models.Card, {
 		    foreignKey: 'card_id',
 		    onUpdate: "NO ACTION",
-		    onDelete: "NO ACTION"
+		    onDelete: "NO ACTION",
+            as: 'balance'
 	    });
     }
   }

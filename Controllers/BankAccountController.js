@@ -1,6 +1,7 @@
 const {BankAccount, Card, BankAccountBalance} = require("../models");
 const helper = require("../helpers");
 const moment = require("moment");
+const bcrypt = require("bcryptjs");
 const Joi = require('joi').extend(require('@joi/date'))
 
 const NUM = '0123456789';
@@ -30,9 +31,9 @@ const createAccount = async (req, res) => {
 }
 
 const getAccount = (req, res) => {
-	BankAccount.findOne({where: {id: req.params.id}}).then((response) => {
+	BankAccount.findOne({where: {user_id: req.params.id}, include: [{association: 'Card', include: [{association: 'balance', seperate: true, order: [['updated_at', 'DESC']]}]}]}).then((response) => {
 		if(response)
-			return helper.response(res, {data: response.dataValues, message: 'Account fetched successfully'});
+			return helper.response(res, {data: [response.dataValues, 'Account fetched successfully']}, 200);
 		else
 			return helper.response(res, {message: 'Account not found'}, 404);
 	}).catch(error => helper.response(res, {error}, 500));
@@ -42,7 +43,7 @@ const updatePassword = (req, res) => {
 	let body = req.body;
 	
 	const validator = Joi.object({
-		password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9+]{8,16}$')).required()
+		password: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9+!@#$%^&*()-_=]{8,16}$/)).required()
 	});
 	
 	validator.validateAsync(body, {allowUnknown: true, abortEarly: false}).then(async (validated) => {
@@ -50,40 +51,42 @@ const updatePassword = (req, res) => {
 			if(response)
 				return helper.response(res, {message: 'Bank Account already owns a card'}, 422);
 			else
-				BankAccount.update({account_password: validated.password, status: 'active'}, {where: {id: req.params.id}}).then((response) => {
-					if(response){
-						BankAccount.findOne({where: {user_id: req.token.id, id: req.params.id, status: 'active'}}).then(async (response) => {
-							if(response.dataValues){
-								console.log(response.dataValues);
-								let values = response.dataValues,
+				bcrypt.hash(validated.password, 10).then(hashed => {
+					BankAccount.update({account_password: hashed, status: 'active'}, {where: {id: req.params.id}}).then((response) => {
+						if(response){
+							BankAccount.findOne({where: {user_id: req.token.id, id: req.params.id, status: 'active'}}).then(async (response) => {
+								if(response.dataValues){
+									console.log(response.dataValues);
+									let values = response.dataValues,
 									cvv = helper.generateRandomNumber(3),
 									cardNumber = helper.generateRandomNumber(16);
-								
-								while(await Card.findOne({where: {cvv}}))
-									cvv = helper.generateRandomNumber(3);
-								while(await Card.findOne({where: {card_number: cardNumber}}))
-									cardNumber = helper.generateRandomNumber(16);
-								Card.create({
-									bank_account_id: values.id,
-									card_number: cardNumber,
-									cvv,
-									issue_date: moment(moment.now()).format('YYY-MM-DD HH:mm:ss'),
-									exp_date: moment().add(5, 'y').format('YYYY-MM-DD HH:mm:ss'),
-									card_type: 'visa'
-								}).then((response) => {
-									if(response){
-										BankAccountBalance.create({
-											card_id: response.dataValues.id,
-											amount: '100.00'
-										}).then(() => helper.response(res, {message: 'Account password has been updated successfully and Card created'}, 200));
-									}
-								}).catch(error => helper.response(res, {message: 'An Error Occurred', error}));
-							}
-						}).catch(error => helper.response(res, error, 500));
-					}
-				}).catch(error => helper.response(res, error, 500));
-			}).catch(error => helper.response(res, helper.formatJoiError(error), 500));
-		});
+
+									while(await Card.findOne({where: {cvv}}))
+										cvv = helper.generateRandomNumber(3);
+									while(await Card.findOne({where: {card_number: cardNumber}}))
+										cardNumber = helper.generateRandomNumber(16);
+									Card.create({
+										bank_account_id: values.id,
+										card_number: cardNumber,
+										cvv,
+										issue_date: moment(moment.now()).format('YYY-MM-DD HH:mm:ss'),
+												exp_date: moment().add(5, 'y').format('YYYY-MM-DD HH:mm:ss'),
+												card_type: 'visa'
+									}).then((response) => {
+										if(response){
+											BankAccountBalance.create({
+												card_id: response.dataValues.id,
+												amount: '100.00'
+											}).then(() => helper.response(res, {message: 'Account password has been updated successfully and Card created'}, 200));
+										}
+									}).catch(error => helper.response(res, {message: 'An Error Occurred', error}));
+								}
+							}).catch(error => helper.response(res, error, 500));
+						}
+					}).catch(error => helper.response(res, error, 500));
+				}).catch((e) => helper.response(res, {message:'An error occured!', error: e}, 500));
+		}).catch(error => helper.response(res, helper.formatJoiError(error), 500));
+	}).catch(error => helper.response(res, helper.formatJoiError(error), 500));
 }
 
 module.exports = { createAccount, getAccount, updatePassword }
