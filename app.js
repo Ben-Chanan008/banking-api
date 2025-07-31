@@ -1,6 +1,6 @@
 const express = require('express');
+const dotenv = require('dotenv').config();
 const db = require('./models');
-const dotenv = require('dotenv');
 const cors = require('cors');
 const routes = require('./routes');
 const moment = require("moment");
@@ -11,7 +11,6 @@ const winston = require('winston');
 
 const paspportStrategy = require('./Controllers/SocialLoginController');
 const app = express();
-dotenv.config();
 
 app.use(cors());
 app.use(express.json({strict: false }));
